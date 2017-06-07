@@ -1,4 +1,4 @@
-﻿namespace SIM.Tool.Windows.MainWindowComponents
+namespace SIM.Tool.Windows.MainWindowComponents
 {
   using System;
   using System.IO;
@@ -50,15 +50,6 @@
       File.WriteAllLines(Path.Combine(dir, "args.txt"), args);
 
       CoreApp.RunApp("iexplore", $"http://dl.sitecore.net/updater/pc/PatchCreator.application");
-              
-      NuGetHelper.UpdateSettings();
-
-      NuGetHelper.GeneratePackages(new FileInfo(product.PackagePath));
-
-      foreach (var module in instance.Modules)
-      {
-        NuGetHelper.GeneratePackages(new FileInfo(module.PackagePath));
-      }
     }
 
     #endregion
