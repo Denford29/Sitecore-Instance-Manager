@@ -9,18 +9,15 @@
   using SIM.Commands;
   using SIM.Serialization;
   using System.Diagnostics;
+  using System.Linq;
 
   /// <summary>
-  ///   The main entry point to the application where all work starts.
+  ///   The instance of App class repre
   /// </summary>
-  public class App
+  public abstract class App
   {
     [NotNull]
-    internal static IReadOnlyDictionary<Type, string[]> Verbs { get; } =
-      new Dictionary<Type, string[]>
-      {
-        { typeof(HelpCommand), new[] { "help", "Provides information about app or particular command" } }
-      };
+    protected internal abstract IReadOnlyDictionary<Type, string[]> Verbs { get; }
 
     [NotNull]
     private static JsonSerializerSettings SerializerSettings { get; } =
@@ -40,30 +37,33 @@
       };
 
     [NotNull]
-    internal string CommandName { get; }
+    public abstract string Information { get; }
 
     [NotNull]
-    internal string CommandData { get; }
+    public abstract string ExecutableName { get; }
 
-    protected internal App([NotNull] string commandName, [NotNull] string commandData)
+    protected internal App()
     {
-      CommandName = commandName;
-      CommandData = commandData;
     }
 
     /// <summary>
     ///   Start work of application with given parameters.
     /// </summary>
     /// <returns>The return code.</returns>
-    public int Start()
+    public int Start([NotNull] string commandName, [NotNull] string commandData)
     {
-      return ProcessOutput(Process());
+      if (!Verbs.ContainsKey(typeof(HelpCommand)) && !Verbs.Keys.Any(x => x.GetType().IsAssignableFrom(typeof(HelpCommand))))
+      {
+        throw new InvalidOperationException($"The {typeof(HelpCommand).Name} command is missing in {nameof(Verbs)}");
+      }
+
+      return ProcessOutput(Process(commandName, commandData));
     }
 
     [NotNull]
-    internal AppOutput Process()
+    internal AppOutput Process([NotNull] string commandName, [NotNull] string commandData)
     {
-      var firstWord = CommandName;
+      var firstWord = commandName;
       if (firstWord == "" || firstWord == "-?" || firstWord == "/?" || firstWord == "info" || firstWord == "-info" || firstWord == "--info" || firstWord == "--help" || firstWord == "--info")
       {
         firstWord = "help";
@@ -79,12 +79,12 @@
         var type = verb.Key;
         Assert.IsNotNull(type);
 
-        return ProcessVerb(type);
+        return ProcessVerb(type, commandData);
       }
 
       var error = new AppOutput
       {
-        Error = $"Cannot find command '{firstWord}'. Run 'sim info' to get list of all supported commands.",
+        Error = $"Cannot find command '{firstWord}'. Run '{ExecutableName} info' to get list of all supported commands.",
         Success = false,
         ReturnCode = -2
       };
@@ -107,9 +107,8 @@
     }
 
     [NotNull]
-    private AppOutput ProcessVerb([NotNull] Type type)
+    private AppOutput ProcessVerb([NotNull] Type type, [NotNull] string commandData)
     {
-      var commandData = CommandData;
       if (commandData == "")
       {
         commandData = "{}";

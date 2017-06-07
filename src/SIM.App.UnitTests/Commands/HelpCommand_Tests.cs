@@ -9,7 +9,7 @@
     [Fact]
     public void Process_CommandName_Missing()
     {
-      var sut = new HelpCommand
+      var sut = new HelpCommand(new TestApp())
       {
         CommandName = "test123"
       };
@@ -31,7 +31,7 @@
     [Fact]
     public void Process_CommandName_Empty()
     {
-      var sut = new HelpCommand
+      var sut = new HelpCommand(new TestApp())
       {
         CommandName = ""
       };
@@ -56,7 +56,7 @@
     [Fact]
     public void Process_CommandName_Help()
     {
-      var sut = new HelpCommand
+      var sut = new HelpCommand(new TestApp())
       {
         CommandName = "help"
       };

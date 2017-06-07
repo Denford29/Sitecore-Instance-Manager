@@ -9,9 +9,9 @@
     [Fact]
     public void Process_MissingCommand()
     {
-      var sut = new App("test123", "");
+      var sut = new TestApp();
 
-      var output = sut.Process();
+      var output = sut.Process("test123", "");
       Assert.NotNull(output);
       Assert.Equal(false, output.Success);
       Assert.Equal(-2, output.ReturnCode);
@@ -21,9 +21,9 @@
     [Fact]
     public void Process_HelpCommand()
     {
-      var sut = new App("help", "");
+      var sut = new TestApp();
 
-      var output = sut.Process();
+      var output = sut.Process("help", "");
       Assert.NotNull(output);
       Assert.Equal(true, output.Success);
       Assert.Equal(0, output.ReturnCode);

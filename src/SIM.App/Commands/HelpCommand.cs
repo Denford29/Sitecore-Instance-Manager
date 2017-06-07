@@ -8,9 +8,13 @@
 
   public class HelpCommand : ICommand
   {
+    [NotNull]
+    public App App { get; }
+
     [UsedImplicitly]
-    public HelpCommand()
+    public HelpCommand([NotNull] App app)
     {
+      App = app;
     }
 
     [CanBeNull]
@@ -46,12 +50,12 @@
 
       if (!string.IsNullOrWhiteSpace(CommandName))
       {
-        throw new ArgumentException($"Cannot find command '{CommandName}'. Run 'sim help' to get list of all supported commands.");
+        throw new ArgumentException($"Cannot find command '{CommandName}'. Run '{App.ExecutableName} help' to get list of all supported commands.");
       }
 
       return new Success
       {
-        Message = "SIM.exe is a command-line version of Sitecore Instance Manager 2.0 (SIM2), read more on https://github.com/sitecore/sitecore-instance-manager. The list of commands see in 'Data' array, the arguments are passed in JSON5 format. For example: C:\\> sim help {'command': \"help\"}",
+        Message = $"{App.Information.TrimEnd(". ".ToCharArray())}. The list of commands see in 'Data' array, the arguments are passed in JSON5 format. For example: C:\\> {App.ExecutableName} help {{'command': \"help\"}}",
         Data = App.Verbs
           .Select(x => $"{x.Value[0]} - {x.Value[1]}" as object)
           .ToArray()
